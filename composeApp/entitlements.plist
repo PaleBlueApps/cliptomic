@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Allow the app to access the clipboard -->
+    <key>com.apple.security.device.clipboard</key>
+    <true/>
+    
+    <!-- Allow the app to use accessibility features for global hotkeys -->
+    <key>com.apple.security.device.accessibility</key>
+    <true/>
+    
+    <!-- Allow network access for OpenRouter API -->
+    <key>com.apple.security.network.client</key>
+    <true/>
+    
+    <!-- Allow the app to run in the background -->
+    <key>com.apple.security.app-sandbox</key>
+    <false/>
+    
+    <!-- Allow file system access for configuration -->
+    <key>com.apple.security.files.user-selected.read-write</key>
+    <true/>
+</dict>
+</plist>
