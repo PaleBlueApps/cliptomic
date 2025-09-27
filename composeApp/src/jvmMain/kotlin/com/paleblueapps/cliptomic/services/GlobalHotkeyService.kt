@@ -19,9 +19,14 @@ class GlobalHotkeyService : NativeKeyListener {
     private val _hotkeyPressed = MutableSharedFlow<Unit>()
     val hotkeyPressed: SharedFlow<Unit> = _hotkeyPressed.asSharedFlow()
     
+    private val _chatbotHotkeyPressed = MutableSharedFlow<Unit>()
+    val chatbotHotkeyPressed: SharedFlow<Unit> = _chatbotHotkeyPressed.asSharedFlow()
+    
     private var isShiftPressed = false
     private var isControlPressed = false
+    private var isCommandPressed = false
     private var isInitialized = false
+    private var chatbotHotkeyTriggered = false
     
     init {
         // Disable JNativeHook logging to reduce console noise
@@ -66,6 +71,9 @@ class GlobalHotkeyService : NativeKeyListener {
             29, 157 -> { // Left Control, Right Control
                 isControlPressed = true
             }
+            3675, 3676 -> { // Left Command, Right Command (macOS)
+                isCommandPressed = true
+            }
             57 -> { // Space key
                 if (isShiftPressed && isControlPressed) {
                     scope.launch {
@@ -74,15 +82,29 @@ class GlobalHotkeyService : NativeKeyListener {
                 }
             }
         }
+        
+        // Check for Shift+Control+Command combination (chatbot hotkey)
+        if (isShiftPressed && isControlPressed && isCommandPressed && !chatbotHotkeyTriggered) {
+            chatbotHotkeyTriggered = true
+            scope.launch {
+                _chatbotHotkeyPressed.emit(Unit)
+            }
+        }
     }
     
     override fun nativeKeyReleased(e: NativeKeyEvent) {
         when (e.keyCode) {
             42, 54 -> { // Left Shift, Right Shift
                 isShiftPressed = false
+                chatbotHotkeyTriggered = false
             }
             29, 157 -> { // Left Control, Right Control
                 isControlPressed = false
+                chatbotHotkeyTriggered = false
+            }
+            3675, 3676 -> { // Left Command, Right Command (macOS)
+                isCommandPressed = false
+                chatbotHotkeyTriggered = false
             }
         }
     }
@@ -93,5 +115,9 @@ class GlobalHotkeyService : NativeKeyListener {
     
     fun getHotkeyDescription(): String {
         return "Shift+Control+Space"
+    }
+    
+    fun getChatbotHotkeyDescription(): String {
+        return "Shift+Control+Command"
     }
 }

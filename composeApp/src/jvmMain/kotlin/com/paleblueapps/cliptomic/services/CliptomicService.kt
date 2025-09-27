@@ -39,6 +39,13 @@ class CliptomicService(
             }
         }
         
+        // Listen for chatbot hotkey presses
+        scope.launch {
+            globalHotkeyService.chatbotHotkeyPressed.collectLatest {
+                handleChatbotHotkeyPressed()
+            }
+        }
+        
         trayManager.updateStatus("Ready - ${globalHotkeyService.getHotkeyDescription()}")
     }
     
@@ -118,6 +125,11 @@ class CliptomicService(
             println("CliptomicService error: ${e.message}")
             e.printStackTrace()
         }
+    }
+    
+    private fun handleChatbotHotkeyPressed() {
+        // Toggle chatbot window visibility
+        trayManager.showChatbot.value = !trayManager.showChatbot.value
     }
     
     fun cleanup() {

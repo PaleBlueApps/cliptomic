@@ -21,6 +21,7 @@ class TrayManager {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     
     val showSettings = mutableStateOf(false)
+    val showChatbot = mutableStateOf(false)
     val isProcessing = mutableStateOf(false)
     
     fun initialize() {
@@ -42,6 +43,13 @@ class TrayManager {
         
         // Create popup menu
         val popup = PopupMenu()
+        
+        // Chatbot menu item
+        val chatbotItem = MenuItem("AI Chat")
+        chatbotItem.addActionListener {
+            showChatbot.value = true
+        }
+        popup.add(chatbotItem)
         
         // Settings menu item
         val settingsItem = MenuItem("Settings")

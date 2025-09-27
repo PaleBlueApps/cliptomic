@@ -8,6 +8,8 @@ import androidx.compose.ui.window.application
 import com.paleblueapps.cliptomic.presentation.TrayManager
 import com.paleblueapps.cliptomic.presentation.settings.SettingsScreen
 import com.paleblueapps.cliptomic.presentation.settings.SettingsViewModel
+import com.paleblueapps.cliptomic.presentation.chatbot.ChatbotScreen
+import com.paleblueapps.cliptomic.presentation.chatbot.ChatbotViewModel
 import com.paleblueapps.cliptomic.services.CliptomicService
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -22,6 +24,8 @@ fun main() {
         val trayManager = remember { TrayManager() }
         val settingsViewModel = remember { SettingsViewModel() }
         val cliptomicService = remember { CliptomicService(settingsViewModel, trayManager) }
+        val chatbotOpenRouterService = remember { com.paleblueapps.cliptomic.services.OpenRouterService() }
+        val chatbotViewModel = remember { ChatbotViewModel(chatbotOpenRouterService) }
         
         // Initialize services on startup
         LaunchedEffect(Unit) {
@@ -53,10 +57,28 @@ fun main() {
             }
         }
         
+        // Chatbot window
+        if (trayManager.showChatbot.value) {
+            Window(
+                onCloseRequest = { trayManager.showChatbot.value = false },
+                title = "AI Chat",
+                state = WindowState(width = 400.dp, height = 600.dp),
+                alwaysOnTop = true
+            ) {
+                ChatbotScreen(
+                    viewModel = chatbotViewModel,
+                    apiKey = settingsViewModel.getCurrentApiKey(),
+                    model = settingsViewModel.getCurrentModel(),
+                    onClose = { trayManager.showChatbot.value = false }
+                )
+            }
+        }
+        
         // Cleanup on exit
         DisposableEffect(Unit) {
             onDispose {
                 cliptomicService.cleanup()
+                chatbotOpenRouterService.close()
                 trayManager.cleanup()
             }
         }

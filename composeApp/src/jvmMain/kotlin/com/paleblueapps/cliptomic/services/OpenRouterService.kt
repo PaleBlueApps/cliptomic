@@ -86,6 +86,47 @@ class OpenRouterService {
         }
     }
 
+    suspend fun chatWithHistory(
+        messages: List<Message>,
+        apiKey: String,
+        model: String,
+        systemPrompt: String = "You are a helpful AI assistant. Provide direct, exact responses without any additional commentary, prefixes, or phrases like 'this is a response', 'here's my answer', etc. Just give the requested information or answer directly."
+    ): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val allMessages = mutableListOf<Message>()
+            
+            // Add system message if not already present
+            if (messages.isEmpty() || messages.first().role != "system") {
+                allMessages.add(Message(role = "system", content = systemPrompt))
+            }
+            
+            // Add conversation history
+            allMessages.addAll(messages)
+            
+            val request = OpenRouterRequest(
+                model = model,
+                messages = allMessages,
+                maxTokens = 2000,
+                temperature = 0.7
+            )
+
+            val response: OpenRouterResponse = client.post("https://openrouter.ai/api/v1/chat/completions") {
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $apiKey")
+                header("HTTP-Referer", "https://github.com/paleblueapps/cliptomic")
+                header("X-Title", "Cliptomic")
+                setBody(request)
+            }.body()
+
+            val responseText = response.choices.firstOrNull()?.message?.content
+                ?: return@withContext Result.failure(Exception("No response from OpenRouter"))
+
+            Result.success(responseText.trim())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     fun close() {
         client.close()
     }
