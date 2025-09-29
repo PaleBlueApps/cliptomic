@@ -3,6 +3,7 @@ package com.paleblueapps.cliptomic.presentation.chatbot
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,11 +19,13 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.*
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.draw.clip
 import kotlinx.coroutines.delay
 import java.awt.Toolkit
 import java.awt.datatransfer.DataFlavor
@@ -30,9 +33,11 @@ import java.awt.datatransfer.StringSelection
 import java.text.SimpleDateFormat
 import java.util.*
 
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun ChatbotScreen(
     viewModel: ChatbotViewModel,
+    windowState: androidx.compose.ui.window.WindowState,
     apiKey: String,
     model: String,
     onClose: () -> Unit
@@ -57,95 +62,68 @@ fun ChatbotScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF2B2B2B))
-            .padding(12.dp)
-    ) {
-        // Header
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "AI Chat",
-                color = Color.White,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
-            )
-            
-            Row {
-                // Clear conversation button
-                TextButton(
-                    onClick = { viewModel.clearConversation() },
-                    modifier = Modifier.height(24.dp),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
-                ) {
-                    Text(
-                        "Clear",
-                        color = Color.Gray,
-                        fontSize = 10.sp
-                    )
-                }
-                
-                // Close button
-                TextButton(
-                    onClick = onClose,
-                    modifier = Modifier.height(24.dp),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
-                ) {
-                    Text(
-                        "✕",
-                        color = Color.Gray,
-                        fontSize = 12.sp
+            .background(Color(0xD0000000)) // Less transparent dark background
+            .clip(RoundedCornerShape(12.dp))
+            .pointerInput(Unit) {
+                detectDragGestures { delta ->
+                    val currentPosition = windowState.position
+                    windowState.position = androidx.compose.ui.window.WindowPosition(
+                        x = currentPosition.x + (delta.x / density).dp,
+                        y = currentPosition.y + (delta.y / density).dp
                     )
                 }
             }
+            .padding(16.dp)
+    ) {
+        // Custom title bar with just X button
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Close button
+            IconButton(
+                onClick = onClose,
+                modifier = Modifier
+                    .size(32.dp)
+                    .background(
+                        Color.White.copy(alpha = 0.1f),
+                        RoundedCornerShape(8.dp)
+                    )
+            ) {
+                Text(
+                    "✕",
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
         
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        // Messages area
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .background(
-                    Color(0xFF1E1E1E),
-                    RoundedCornerShape(8.dp)
-                )
-                .border(
-                    1.dp,
-                    Color(0xFF404040),
-                    RoundedCornerShape(8.dp)
-                )
-        ) {
-            if (viewModel.messages.isEmpty()) {
-                // Empty state
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = "Start a conversation with AI",
-                        color = Color.Gray,
-                        fontSize = 12.sp,
-                        textAlign = TextAlign.Center
+        // Messages area - only show when there are messages
+        if (viewModel.messages.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .background(
+                        Color.White.copy(alpha = 0.05f),
+                        RoundedCornerShape(12.dp)
                     )
-                    Text(
-                        text = "Type your message below",
-                        color = Color.Gray,
-                        fontSize = 10.sp,
-                        textAlign = TextAlign.Center
+                    .border(
+                        1.dp,
+                        Color.White.copy(alpha = 0.1f),
+                        RoundedCornerShape(12.dp)
                     )
-                }
-            } else {
+            ) {
                 LazyColumn(
                     state = listState,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                        .padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(viewModel.messages) { message ->
                         MessageBubble(
@@ -170,24 +148,24 @@ fun ChatbotScreen(
                                 horizontalArrangement = Arrangement.Start
                             ) {
                                 Card(
-                                    colors = CardDefaults.cardColors(containerColor = Color(0xFF404040)),
-                                    shape = RoundedCornerShape(12.dp),
+                                    colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.1f)),
+                                    shape = RoundedCornerShape(16.dp),
                                     modifier = Modifier.padding(end = 48.dp)
                                 ) {
                                     Row(
-                                        modifier = Modifier.padding(12.dp),
+                                        modifier = Modifier.padding(16.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         CircularProgressIndicator(
-                                            modifier = Modifier.size(12.dp),
+                                            modifier = Modifier.size(16.dp),
                                             strokeWidth = 2.dp,
-                                            color = Color.White
+                                            color = Color.White.copy(alpha = 0.8f)
                                         )
-                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Spacer(modifier = Modifier.width(12.dp))
                                         Text(
                                             text = "AI is thinking...",
-                                            color = Color.White,
-                                            fontSize = 11.sp
+                                            color = Color.White.copy(alpha = 0.8f),
+                                            fontSize = 12.sp
                                         )
                                     }
                                 }
@@ -196,20 +174,31 @@ fun ChatbotScreen(
                     }
                 }
             }
+            
+            Spacer(modifier = Modifier.height(12.dp))
+        } else {
+            // When no messages, just add flexible space
+            Spacer(modifier = Modifier.weight(1f))
         }
         
         // Error message
         if (viewModel.error.value != null) {
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = viewModel.error.value!!,
-                color = Color(0xFFFF6B6B),
-                fontSize = 10.sp,
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0x40FF6B6B)
+                ),
+                shape = RoundedCornerShape(8.dp),
                 modifier = Modifier.fillMaxWidth()
-            )
+            ) {
+                Text(
+                    text = viewModel.error.value!!,
+                    color = Color(0xFFFF9999),
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(12.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
         }
-        
-        Spacer(modifier = Modifier.height(8.dp))
         
         // Chip buttons for quick replies
         Row(
@@ -232,14 +221,14 @@ fun ChatbotScreen(
                         }
                     },
                 colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFF404040)
+                    containerColor = Color.White.copy(alpha = 0.1f)
                 ),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(20.dp)
             ) {
                 Text(
-                    text = "Reply to this email",
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                    color = Color.White,
+                    text = "Reply to email",
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    color = Color.White.copy(alpha = 0.9f),
                     fontSize = 11.sp
                 )
             }
@@ -260,20 +249,20 @@ fun ChatbotScreen(
                         }
                     },
                 colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFF404040)
+                    containerColor = Color.White.copy(alpha = 0.1f)
                 ),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(20.dp)
             ) {
                 Text(
-                    text = "Reply to this message",
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                    color = Color.White,
+                    text = "Reply to message",
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    color = Color.White.copy(alpha = 0.9f),
                     fontSize = 11.sp
                 )
             }
         }
         
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(12.dp))
         
         // Input area
         Row(
@@ -308,17 +297,17 @@ fun ChatbotScreen(
                 placeholder = {
                     Text(
                         "Ask AI anything...",
-                        color = Color.Gray,
+                        color = Color.White.copy(alpha = 0.6f),
                         fontSize = 12.sp
                     )
                 },
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedTextColor = Color.White,
                     unfocusedTextColor = Color.White,
-                    focusedContainerColor = Color(0xFF1E1E1E),
-                    unfocusedContainerColor = Color(0xFF1E1E1E),
-                    focusedBorderColor = Color(0xFF0078D4),
-                    unfocusedBorderColor = Color(0xFF404040),
+                    focusedContainerColor = Color.White.copy(alpha = 0.05f),
+                    unfocusedContainerColor = Color.White.copy(alpha = 0.05f),
+                    focusedBorderColor = Color.White.copy(alpha = 0.3f),
+                    unfocusedBorderColor = Color.White.copy(alpha = 0.1f),
                     cursorColor = Color.White
                 ),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
@@ -332,10 +321,10 @@ fun ChatbotScreen(
                     }
                 ),
                 maxLines = 3,
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(12.dp)
             )
             
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(12.dp))
             
             // Send button
             IconButton(
@@ -348,19 +337,22 @@ fun ChatbotScreen(
                 },
                 enabled = viewModel.currentInput.value.isNotBlank() && !viewModel.isLoading.value,
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(48.dp)
                     .background(
                         if (viewModel.currentInput.value.isNotBlank() && !viewModel.isLoading.value) 
-                            Color(0xFF0078D4) 
+                            Color.White.copy(alpha = 0.2f)
                         else 
-                            Color(0xFF404040),
-                        RoundedCornerShape(8.dp)
+                            Color.White.copy(alpha = 0.05f),
+                        RoundedCornerShape(12.dp)
                     )
             ) {
                 Text(
-                    "Send",
-                    color = Color.White,
-                    fontSize = 11.sp,
+                    "→",
+                    color = if (viewModel.currentInput.value.isNotBlank() && !viewModel.isLoading.value) 
+                        Color.White 
+                    else 
+                        Color.White.copy(alpha = 0.5f),
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Medium
                 )
             }

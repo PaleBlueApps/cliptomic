@@ -1,23 +1,31 @@
 package com.paleblueapps.cliptomic.presentation.settings
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.paleblueapps.cliptomic.services.OpenRouterService
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel(),
+    windowState: androidx.compose.ui.window.WindowState,
     onClose: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -27,78 +35,129 @@ fun SettingsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
+            .background(Color(0xD0000000)) // Less transparent dark background
+            .clip(RoundedCornerShape(12.dp))
+            .pointerInput(Unit) {
+                detectDragGestures { delta ->
+                    val currentPosition = windowState.position
+                    windowState.position = androidx.compose.ui.window.WindowPosition(
+                        x = currentPosition.x + (delta.x / density).dp,
+                        y = currentPosition.y + (delta.y / density).dp
+                    )
+                }
+            }
+            .padding(20.dp)
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Header
+        // Custom title bar with just X button
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Cliptomic Settings",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
+                text = "Settings",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Medium
             )
-            TextButton(onClick = onClose) {
-                Text("Close")
+            
+            // Close button
+            IconButton(
+                onClick = onClose,
+                modifier = Modifier
+                    .size(32.dp)
+                    .background(
+                        Color.White.copy(alpha = 0.1f),
+                        RoundedCornerShape(8.dp)
+                    )
+            ) {
+                Text(
+                    "✕",
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium
+                )
             }
         }
 
-        Divider()
+        Spacer(modifier = Modifier.height(8.dp))
 
         // API Key Section
         Card(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White.copy(alpha = 0.05f)
+            ),
+            shape = RoundedCornerShape(12.dp)
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
                     text = "OpenRouter API Key",
-                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.White,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold
                 )
                 
                 OutlinedTextField(
                     value = uiState.apiKey,
                     onValueChange = viewModel::updateApiKey,
-                    label = { Text("API Key") },
-                    placeholder = { Text("Enter your OpenRouter API key") },
+                    label = { Text("API Key", color = Color.White.copy(alpha = 0.7f)) },
+                    placeholder = { Text("Enter your OpenRouter API key", color = Color.White.copy(alpha = 0.5f)) },
                     modifier = Modifier.fillMaxWidth(),
                     visualTransformation = if (showApiKey) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
                         TextButton(
                             onClick = { showApiKey = !showApiKey }
                         ) {
-                            Text(if (showApiKey) "Hide" else "Show")
+                            Text(
+                                if (showApiKey) "Hide" else "Show",
+                                color = Color.White.copy(alpha = 0.7f),
+                                fontSize = 12.sp
+                            )
                         }
                     },
-                    singleLine = true
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedContainerColor = Color.White.copy(alpha = 0.05f),
+                        unfocusedContainerColor = Color.White.copy(alpha = 0.05f),
+                        focusedBorderColor = Color.White.copy(alpha = 0.3f),
+                        unfocusedBorderColor = Color.White.copy(alpha = 0.1f),
+                        cursorColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(8.dp)
                 )
                 
                 Text(
                     text = "Get your API key from https://openrouter.ai/keys",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = Color.White.copy(alpha = 0.6f),
+                    fontSize = 12.sp
                 )
             }
         }
 
         // Model Selection Section
         Card(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White.copy(alpha = 0.05f)
+            ),
+            shape = RoundedCornerShape(12.dp)
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
                     text = "Model Selection",
-                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.White,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold
                 )
 
@@ -109,10 +168,19 @@ fun SettingsScreen(
                 ) {
                     Checkbox(
                         checked = uiState.useCustomModel,
-                        onCheckedChange = viewModel::updateUseCustomModel
+                        onCheckedChange = viewModel::updateUseCustomModel,
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = Color.White.copy(alpha = 0.8f),
+                            uncheckedColor = Color.White.copy(alpha = 0.3f),
+                            checkmarkColor = Color.Black
+                        )
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Use custom model")
+                    Text(
+                        "Use custom model",
+                        color = Color.White.copy(alpha = 0.9f),
+                        fontSize = 14.sp
+                    )
                 }
 
                 if (uiState.useCustomModel) {
@@ -120,15 +188,25 @@ fun SettingsScreen(
                     OutlinedTextField(
                         value = uiState.customModel,
                         onValueChange = viewModel::updateCustomModel,
-                        label = { Text("Custom Model") },
-                        placeholder = { Text("e.g., openai/gpt-4o") },
+                        label = { Text("Custom Model", color = Color.White.copy(alpha = 0.7f)) },
+                        placeholder = { Text("e.g., openai/gpt-4o", color = Color.White.copy(alpha = 0.5f)) },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            focusedContainerColor = Color.White.copy(alpha = 0.05f),
+                            unfocusedContainerColor = Color.White.copy(alpha = 0.05f),
+                            focusedBorderColor = Color.White.copy(alpha = 0.3f),
+                            unfocusedBorderColor = Color.White.copy(alpha = 0.1f),
+                            cursorColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(8.dp)
                     )
                     Text(
                         text = "Enter the exact model identifier from OpenRouter",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = Color.White.copy(alpha = 0.6f),
+                        fontSize = 12.sp
                     )
                 } else {
                     // Predefined model dropdown
@@ -140,24 +218,40 @@ fun SettingsScreen(
                             value = uiState.selectedModel,
                             onValueChange = { },
                             readOnly = true,
-                            label = { Text("Select Model") },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDropdown) },
+                            label = { Text("Select Model", color = Color.White.copy(alpha = 0.7f)) },
+                            trailingIcon = { 
+                                ExposedDropdownMenuDefaults.TrailingIcon(
+                                    expanded = expandedDropdown,
+                                    modifier = Modifier
+                                ) 
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .menuAnchor()
+                                .menuAnchor(),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White,
+                                focusedContainerColor = Color.White.copy(alpha = 0.05f),
+                                unfocusedContainerColor = Color.White.copy(alpha = 0.05f),
+                                focusedBorderColor = Color.White.copy(alpha = 0.3f),
+                                unfocusedBorderColor = Color.White.copy(alpha = 0.1f),
+                                cursorColor = Color.White
+                            ),
+                            shape = RoundedCornerShape(8.dp)
                         )
                         
                         ExposedDropdownMenu(
                             expanded = expandedDropdown,
-                            onDismissRequest = { expandedDropdown = false }
+                            onDismissRequest = { expandedDropdown = false },
+                            modifier = Modifier.background(Color(0xFF2B2B2B))
                         ) {
                             // Free models section
                             Text(
                                 text = "Free Models",
-                                style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                                color = MaterialTheme.colorScheme.primary
+                                color = Color.White.copy(alpha = 0.8f),
+                                fontSize = 12.sp
                             )
                             
                             OpenRouterService.FREE_MODELS.forEach { model ->
@@ -165,7 +259,8 @@ fun SettingsScreen(
                                     text = { 
                                         Text(
                                             text = model,
-                                            style = MaterialTheme.typography.bodyMedium
+                                            color = Color.White.copy(alpha = 0.9f),
+                                            fontSize = 14.sp
                                         )
                                     },
                                     onClick = {
@@ -175,15 +270,18 @@ fun SettingsScreen(
                                 )
                             }
                             
-                            Divider(modifier = Modifier.padding(vertical = 4.dp))
+                            HorizontalDivider(
+                                modifier = Modifier.padding(vertical = 4.dp),
+                                color = Color.White.copy(alpha = 0.1f)
+                            )
                             
                             // Paid models section
                             Text(
                                 text = "Premium Models",
-                                style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                                color = MaterialTheme.colorScheme.secondary
+                                color = Color.White.copy(alpha = 0.8f),
+                                fontSize = 12.sp
                             )
                             
                             OpenRouterService.PAID_MODELS.forEach { model ->
@@ -191,7 +289,8 @@ fun SettingsScreen(
                                     text = { 
                                         Text(
                                             text = model,
-                                            style = MaterialTheme.typography.bodyMedium
+                                            color = Color.White.copy(alpha = 0.9f),
+                                            fontSize = 14.sp
                                         )
                                     },
                                     onClick = {
@@ -208,80 +307,114 @@ fun SettingsScreen(
 
         // Prompt Configuration Section
         Card(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White.copy(alpha = 0.05f)
+            ),
+            shape = RoundedCornerShape(12.dp)
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
                     text = "Prompt Configuration",
-                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.White,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold
                 )
                 
                 OutlinedTextField(
                     value = uiState.systemPrompt,
                     onValueChange = viewModel::updateSystemPrompt,
-                    label = { Text("System Prompt") },
-                    placeholder = { Text("Enter the system prompt for the AI assistant") },
+                    label = { Text("System Prompt", color = Color.White.copy(alpha = 0.7f)) },
+                    placeholder = { Text("Enter the system prompt for the AI assistant", color = Color.White.copy(alpha = 0.5f)) },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 3,
-                    maxLines = 5
+                    maxLines = 5,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedContainerColor = Color.White.copy(alpha = 0.05f),
+                        unfocusedContainerColor = Color.White.copy(alpha = 0.05f),
+                        focusedBorderColor = Color.White.copy(alpha = 0.3f),
+                        unfocusedBorderColor = Color.White.copy(alpha = 0.1f),
+                        cursorColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(8.dp)
                 )
                 
                 Text(
                     text = "This prompt defines the AI's role and behavior when rewriting text.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = Color.White.copy(alpha = 0.6f),
+                    fontSize = 12.sp
                 )
                 
                 OutlinedTextField(
                     value = uiState.userPromptTemplate,
                     onValueChange = viewModel::updateUserPromptTemplate,
-                    label = { Text("User Prompt Template") },
-                    placeholder = { Text("Please rewrite the following text: {text}") },
+                    label = { Text("User Prompt Template", color = Color.White.copy(alpha = 0.7f)) },
+                    placeholder = { Text("Please rewrite the following text: {text}", color = Color.White.copy(alpha = 0.5f)) },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 2,
-                    maxLines = 3
+                    maxLines = 3,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedContainerColor = Color.White.copy(alpha = 0.05f),
+                        unfocusedContainerColor = Color.White.copy(alpha = 0.05f),
+                        focusedBorderColor = Color.White.copy(alpha = 0.3f),
+                        unfocusedBorderColor = Color.White.copy(alpha = 0.1f),
+                        cursorColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(8.dp)
                 )
                 
                 Text(
                     text = "Use {text} as a placeholder for the clipboard content. This template will be sent to the AI with your text.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = Color.White.copy(alpha = 0.6f),
+                    fontSize = 12.sp
                 )
             }
         }
 
         // Usage Instructions
         Card(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White.copy(alpha = 0.05f)
+            ),
+            shape = RoundedCornerShape(12.dp)
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
                     text = "How to Use",
-                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.White,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
                     text = "1. Copy text to your clipboard",
-                    style = MaterialTheme.typography.bodyMedium
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontSize = 14.sp
                 )
                 Text(
                     text = "2. Press Shift+Space",
-                    style = MaterialTheme.typography.bodyMedium
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontSize = 14.sp
                 )
                 Text(
                     text = "3. The rewritten text will replace your clipboard content",
-                    style = MaterialTheme.typography.bodyMedium
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontSize = 14.sp
                 )
                 Text(
                     text = "4. Paste the improved text wherever you need it",
-                    style = MaterialTheme.typography.bodyMedium
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontSize = 14.sp
                 )
             }
         }
@@ -290,13 +423,15 @@ fun SettingsScreen(
         uiState.errorMessage?.let { error ->
             Card(
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer
-                )
+                    containerColor = Color(0x40FF6B6B)
+                ),
+                shape = RoundedCornerShape(12.dp)
             ) {
                 Text(
                     text = error,
                     modifier = Modifier.padding(16.dp),
-                    color = MaterialTheme.colorScheme.onErrorContainer
+                    color = Color(0xFFFF9999),
+                    fontSize = 14.sp
                 )
             }
         }
@@ -306,19 +441,21 @@ fun SettingsScreen(
         Card(
             colors = CardDefaults.cardColors(
                 containerColor = if (isValid) 
-                    MaterialTheme.colorScheme.primaryContainer 
+                    Color(0x4000FF00)
                 else 
-                    MaterialTheme.colorScheme.secondaryContainer
-            )
+                    Color(0x40FFA500)
+            ),
+            shape = RoundedCornerShape(12.dp)
         ) {
             Text(
                 text = if (isValid) "✓ Configuration is valid" else "⚠ Please configure API key and model",
                 modifier = Modifier.padding(16.dp),
                 color = if (isValid) 
-                    MaterialTheme.colorScheme.onPrimaryContainer 
+                    Color(0xFF99FF99)
                 else 
-                    MaterialTheme.colorScheme.onSecondaryContainer,
-                fontWeight = FontWeight.Medium
+                    Color(0xFFFFCC99),
+                fontWeight = FontWeight.Medium,
+                fontSize = 14.sp
             )
         }
     }

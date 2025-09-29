@@ -5,6 +5,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
+import androidx.compose.ui.window.WindowPlacement
+import java.awt.Color as AwtColor
 import com.paleblueapps.cliptomic.presentation.TrayManager
 import com.paleblueapps.cliptomic.presentation.settings.SettingsScreen
 import com.paleblueapps.cliptomic.presentation.settings.SettingsViewModel
@@ -43,15 +45,22 @@ fun main() {
             }
         }
         
+        // Window states for dragging
+        val settingsWindowState = remember { WindowState(width = 600.dp, height = 800.dp) }
+        val chatbotWindowState = remember { WindowState(width = 400.dp, height = 600.dp) }
+        
         // Settings window
         if (trayManager.showSettings.value) {
             Window(
                 onCloseRequest = { trayManager.showSettings.value = false },
                 title = "Cliptomic Settings",
-                state = WindowState(width = 600.dp, height = 800.dp)
+                state = settingsWindowState,
+                undecorated = true,
+                transparent = true
             ) {
                 SettingsScreen(
                     viewModel = settingsViewModel,
+                    windowState = settingsWindowState,
                     onClose = { trayManager.showSettings.value = false }
                 )
             }
@@ -62,11 +71,14 @@ fun main() {
             Window(
                 onCloseRequest = { trayManager.showChatbot.value = false },
                 title = "AI Chat",
-                state = WindowState(width = 400.dp, height = 600.dp),
-                alwaysOnTop = true
+                state = chatbotWindowState,
+                alwaysOnTop = true,
+                undecorated = true,
+                transparent = true
             ) {
                 ChatbotScreen(
                     viewModel = chatbotViewModel,
+                    windowState = chatbotWindowState,
                     apiKey = settingsViewModel.getCurrentApiKey(),
                     model = settingsViewModel.getCurrentModel(),
                     onClose = { trayManager.showChatbot.value = false }
