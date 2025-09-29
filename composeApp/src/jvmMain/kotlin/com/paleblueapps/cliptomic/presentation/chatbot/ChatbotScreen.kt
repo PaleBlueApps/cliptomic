@@ -75,12 +75,32 @@ fun ChatbotScreen(
             }
             .padding(16.dp)
     ) {
-        // Custom title bar with just X button
+        // Custom title bar with clear and close buttons
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Clear chat button
+            IconButton(
+                onClick = { viewModel.clearConversation() },
+                modifier = Modifier
+                    .size(32.dp)
+                    .background(
+                        Color.White.copy(alpha = 0.1f),
+                        RoundedCornerShape(8.dp)
+                    )
+            ) {
+                Text(
+                    "🗑",
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+            
+            Spacer(modifier = Modifier.width(24.dp))
+            
             // Close button
             IconButton(
                 onClick = onClose,
@@ -213,7 +233,7 @@ fun ChatbotScreen(
                             val clipboard = Toolkit.getDefaultToolkit().systemClipboard
                             val clipboardContent = clipboard.getData(DataFlavor.stringFlavor) as? String
                             if (!clipboardContent.isNullOrBlank()) {
-                                val newText = "Reply to this email: \"${clipboardContent.trim()}\" "
+                                val newText = "Reply to this email with a complete email response: \"${clipboardContent.trim()}\" "
                                 viewModel.updateInput(newText)
                             }
                         } catch (e: Exception) {
@@ -275,19 +295,21 @@ fun ChatbotScreen(
                 modifier = Modifier
                     .weight(1f)
                     .focusRequester(focusRequester)
-                    .onKeyEvent { keyEvent ->
+                    .onPreviewKeyEvent { keyEvent ->
                         if (keyEvent.key == Key.Enter && keyEvent.type == KeyEventType.KeyDown) {
-                            if (keyEvent.isMetaPressed || keyEvent.isCtrlPressed) {
-                                // Cmd/Ctrl+Enter for new line
+                            if (keyEvent.isShiftPressed) {
+                                // Shift+Enter for new line
                                 viewModel.updateInput(viewModel.currentInput.value + "\n")
                                 true
                             } else {
                                 // Enter to send
-                                viewModel.sendMessage(
-                                    viewModel.currentInput.value,
-                                    apiKey,
-                                    model
-                                )
+                                if (viewModel.currentInput.value.isNotBlank()) {
+                                    viewModel.sendMessage(
+                                        viewModel.currentInput.value,
+                                        apiKey,
+                                        model
+                                    )
+                                }
                                 true
                             }
                         } else {
