@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -409,12 +410,14 @@ private fun MessageBubble(
                 Column(
                     modifier = Modifier.padding(12.dp)
                 ) {
-                    Text(
-                        text = message.content,
-                        color = Color.White,
-                        fontSize = 12.sp,
-                        lineHeight = 16.sp
-                    )
+                    SelectionContainer {
+                        Text(
+                            text = message.content,
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            lineHeight = 16.sp
+                        )
+                    }
                     
                     Spacer(modifier = Modifier.height(4.dp))
                     
@@ -427,26 +430,24 @@ private fun MessageBubble(
                     )
                 }
                 
-                // Copy button for AI messages only
-                if (!message.isUser) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(4.dp)
-                            .size(20.dp)
-                            .background(
-                                Color.White.copy(alpha = 0.1f),
-                                RoundedCornerShape(4.dp)
-                            )
-                            .clickable { onCopyMessage(message.content) },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "📋",
-                            fontSize = 10.sp,
-                            color = Color.White.copy(alpha = 0.8f)
+                // Copy button for all messages
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(4.dp)
+                        .size(20.dp)
+                        .background(
+                            Color.White.copy(alpha = 0.1f),
+                            RoundedCornerShape(4.dp)
                         )
-                    }
+                        .clickable { onCopyMessage(message.content) },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "📋",
+                        fontSize = 10.sp,
+                        color = Color.White.copy(alpha = 0.8f)
+                    )
                 }
             }
         }
