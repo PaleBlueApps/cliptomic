@@ -35,24 +35,31 @@ fun SettingsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xD0000000)) // Less transparent dark background
             .clip(RoundedCornerShape(12.dp))
-            .pointerInput(Unit) {
-                detectDragGestures { delta ->
-                    val currentPosition = windowState.position
-                    windowState.position = androidx.compose.ui.window.WindowPosition(
-                        x = currentPosition.x + (delta.x / density).dp,
-                        y = currentPosition.y + (delta.y / density).dp
-                    )
-                }
-            }
+            .background(Color(0xF0000000)) // More opaque dark background
             .padding(20.dp)
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Custom title bar with just X button
+        // Custom title bar with just X button - draggable area
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .pointerInput(Unit) {
+                    detectDragGestures(
+                        onDragStart = { },
+                        onDragEnd = { },
+                        onDragCancel = { },
+                        onDrag = { change, dragAmount ->
+                            change.consume()
+                            val currentPosition = windowState.position
+                            windowState.position = androidx.compose.ui.window.WindowPosition(
+                                x = currentPosition.x + (dragAmount.x / density).dp,
+                                y = currentPosition.y + (dragAmount.y / density).dp
+                            )
+                        }
+                    )
+                },
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
