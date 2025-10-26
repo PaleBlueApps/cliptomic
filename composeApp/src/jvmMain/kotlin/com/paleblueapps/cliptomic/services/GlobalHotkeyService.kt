@@ -77,17 +77,17 @@ class GlobalHotkeyService : NativeKeyListener {
             57 -> { // Space key
                 if (isShiftPressed && isControlPressed) {
                     scope.launch {
-                        _hotkeyPressed.emit(Unit)
+                        _chatbotHotkeyPressed.emit(Unit)
                     }
                 }
             }
         }
         
-        // Check for Shift+Control+Command combination (chatbot hotkey)
+        // Check for Shift+Control+Command combination (copy re-write hotkey)
         if (isShiftPressed && isControlPressed && isCommandPressed && !chatbotHotkeyTriggered) {
             chatbotHotkeyTriggered = true
             scope.launch {
-                _chatbotHotkeyPressed.emit(Unit)
+                _hotkeyPressed.emit(Unit)
             }
         }
     }
@@ -114,10 +114,10 @@ class GlobalHotkeyService : NativeKeyListener {
     }
     
     fun getHotkeyDescription(): String {
-        return "Shift+Control+Space"
+        return "Shift+Control+Command"
     }
     
     fun getChatbotHotkeyDescription(): String {
-        return "Shift+Control+Command"
+        return "Shift+Control+Space"
     }
 }

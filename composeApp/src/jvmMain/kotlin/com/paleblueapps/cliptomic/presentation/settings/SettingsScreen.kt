@@ -395,7 +395,7 @@ fun SettingsScreen(
         ) {
             Column(
                 modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
                     text = "How to Use",
@@ -403,26 +403,55 @@ fun SettingsScreen(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold
                 )
-                Text(
-                    text = "1. Copy text to your clipboard",
-                    color = Color.White.copy(alpha = 0.8f),
-                    fontSize = 14.sp
-                )
-                Text(
-                    text = "2. Press Shift+Space",
-                    color = Color.White.copy(alpha = 0.8f),
-                    fontSize = 14.sp
-                )
-                Text(
-                    text = "3. The rewritten text will replace your clipboard content",
-                    color = Color.White.copy(alpha = 0.8f),
-                    fontSize = 14.sp
-                )
-                Text(
-                    text = "4. Paste the improved text wherever you need it",
-                    color = Color.White.copy(alpha = 0.8f),
-                    fontSize = 14.sp
-                )
+                
+                // Copy Re-write Mode
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = "Copy Re-write Mode (Shift+Control+Command)",
+                        color = Color.White.copy(alpha = 0.9f),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = "1. Copy text to your clipboard",
+                        color = Color.White.copy(alpha = 0.7f),
+                        fontSize = 13.sp
+                    )
+                    Text(
+                        text = "2. Press Shift+Control+Command",
+                        color = Color.White.copy(alpha = 0.7f),
+                        fontSize = 13.sp
+                    )
+                    Text(
+                        text = "3. The rewritten text will replace your clipboard content",
+                        color = Color.White.copy(alpha = 0.7f),
+                        fontSize = 13.sp
+                    )
+                    Text(
+                        text = "4. Paste the improved text wherever you need it",
+                        color = Color.White.copy(alpha = 0.7f),
+                        fontSize = 13.sp
+                    )
+                }
+                
+                // AI Chat Mode
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = "AI Chat Mode (Shift+Control+Space)",
+                        color = Color.White.copy(alpha = 0.9f),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = "Press Shift+Control+Space to open the AI chat window where you can have interactive conversations with the AI assistant.",
+                        color = Color.White.copy(alpha = 0.7f),
+                        fontSize = 13.sp
+                    )
+                }
             }
         }
 
