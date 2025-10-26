@@ -224,76 +224,115 @@ fun ChatbotScreen(
             Spacer(modifier = Modifier.height(8.dp))
         }
         
-        // Model selector
-        ExposedDropdownMenuBox(
-            expanded = expandedModelDropdown,
-            onExpandedChange = { expandedModelDropdown = it },
-            modifier = Modifier.fillMaxWidth()
+        // Model selector with retry button
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            OutlinedTextField(
-                value = selectedModel.substringAfterLast("/").substringBefore(":"),
-                onValueChange = {},
-                readOnly = true,
-                label = {
-                    Text(
-                        "Model",
-                        color = Color.White.copy(alpha = 0.7f),
-                        fontSize = 11.sp
-                    )
-                },
-                trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedModelDropdown)
-                },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedContainerColor = Color.White.copy(alpha = 0.05f),
-                    unfocusedContainerColor = Color.White.copy(alpha = 0.05f),
-                    focusedBorderColor = Color.White.copy(alpha = 0.3f),
-                    unfocusedBorderColor = Color.White.copy(alpha = 0.1f),
-                ),
-                modifier = Modifier
-                    .menuAnchor()
-                    .fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                textStyle = LocalTextStyle.current.copy(fontSize = 12.sp)
-            )
-            
-            ExposedDropdownMenu(
+            ExposedDropdownMenuBox(
                 expanded = expandedModelDropdown,
-                onDismissRequest = { expandedModelDropdown = false },
-                modifier = Modifier
-                    .background(Color(0xFF2D2D2D))
-                    .heightIn(max = 300.dp)
+                onExpandedChange = { expandedModelDropdown = it },
+                modifier = Modifier.weight(1f)
             ) {
-                OpenRouterService.ALL_PREDEFINED_MODELS.forEach { modelOption ->
-                    DropdownMenuItem(
-                        text = {
-                            Column {
-                                Text(
-                                    text = modelOption.substringAfterLast("/").substringBefore(":"),
-                                    color = Color.White,
-                                    fontSize = 12.sp
-                                )
-                                Text(
-                                    text = if (modelOption.contains(":free")) "Free" else "Paid",
-                                    color = if (modelOption.contains(":free")) 
-                                        Color(0xFF4CAF50) 
-                                    else 
-                                        Color(0xFFFF9800),
-                                    fontSize = 10.sp
-                                )
-                            }
-                        },
-                        onClick = {
-                            selectedModel = modelOption
-                            expandedModelDropdown = false
-                        },
-                        colors = MenuDefaults.itemColors(
-                            textColor = Color.White
+                OutlinedTextField(
+                    value = selectedModel.substringAfterLast("/").substringBefore(":"),
+                    onValueChange = {},
+                    readOnly = true,
+                    label = {
+                        Text(
+                            "Model",
+                            color = Color.White.copy(alpha = 0.7f),
+                            fontSize = 11.sp
                         )
-                    )
+                    },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedModelDropdown)
+                    },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedContainerColor = Color.White.copy(alpha = 0.05f),
+                        unfocusedContainerColor = Color.White.copy(alpha = 0.05f),
+                        focusedBorderColor = Color.White.copy(alpha = 0.3f),
+                        unfocusedBorderColor = Color.White.copy(alpha = 0.1f),
+                    ),
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    textStyle = LocalTextStyle.current.copy(fontSize = 12.sp)
+                )
+                
+                ExposedDropdownMenu(
+                    expanded = expandedModelDropdown,
+                    onDismissRequest = { expandedModelDropdown = false },
+                    modifier = Modifier
+                        .background(Color(0xFF2D2D2D))
+                        .heightIn(max = 300.dp)
+                ) {
+                    OpenRouterService.ALL_PREDEFINED_MODELS.forEach { modelOption ->
+                        DropdownMenuItem(
+                            text = {
+                                Column {
+                                    Text(
+                                        text = modelOption.substringAfterLast("/").substringBefore(":"),
+                                        color = Color.White,
+                                        fontSize = 12.sp
+                                    )
+                                    Text(
+                                        text = if (modelOption.contains(":free")) "Free" else "Paid",
+                                        color = if (modelOption.contains(":free")) 
+                                            Color(0xFF4CAF50) 
+                                        else 
+                                            Color(0xFFFF9800),
+                                        fontSize = 10.sp
+                                    )
+                                }
+                            },
+                            onClick = {
+                                selectedModel = modelOption
+                                expandedModelDropdown = false
+                            },
+                            colors = MenuDefaults.itemColors(
+                                textColor = Color.White
+                            )
+                        )
+                    }
                 }
+            }
+            
+            // Retry last prompt button
+            val lastUserMessage = viewModel.messages.filter { it.isUser }.lastOrNull()
+            IconButton(
+                onClick = {
+                    lastUserMessage?.let { message ->
+                        viewModel.sendMessage(
+                            message = message.content,
+                            apiKey = apiKey,
+                            model = selectedModel
+                        )
+                    }
+                },
+                enabled = lastUserMessage != null && !viewModel.isLoading.value,
+                modifier = Modifier
+                    .size(56.dp)
+                    .background(
+                        color = if (lastUserMessage != null && !viewModel.isLoading.value) 
+                            Color.White.copy(alpha = 0.1f) 
+                        else 
+                            Color.White.copy(alpha = 0.05f),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+            ) {
+                Text(
+                    text = "↻",
+                    fontSize = 24.sp,
+                    color = if (lastUserMessage != null && !viewModel.isLoading.value) 
+                        Color.White.copy(alpha = 0.9f) 
+                    else 
+                        Color.White.copy(alpha = 0.3f)
+                )
             }
         }
         
