@@ -11,7 +11,8 @@ import kotlinx.coroutines.launch
 data class ChatMessage(
     val content: String,
     val isUser: Boolean,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = System.currentTimeMillis(),
+    val model: String? = null
 )
 
 class ChatbotViewModel(
@@ -32,7 +33,7 @@ class ChatbotViewModel(
         if (message.isBlank() || isLoading.value) return
         
         // Add user message
-        messages.add(ChatMessage(content = message.trim(), isUser = true))
+        messages.add(ChatMessage(content = message.trim(), isUser = true, model = model))
         currentInput.value = ""
         isLoading.value = true
         error.value = null
@@ -55,7 +56,7 @@ class ChatbotViewModel(
                 
                 if (result.isSuccess) {
                     val response: String = result.getOrThrow()
-                    messages.add(ChatMessage(content = response, isUser = false))
+                    messages.add(ChatMessage(content = response, isUser = false, model = model))
                 } else {
                     error.value = result.exceptionOrNull()?.message ?: "Unknown error occurred"
                 }

@@ -27,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.clip
+import com.paleblueapps.cliptomic.services.OpenRouterService
 import kotlinx.coroutines.delay
 import java.awt.Toolkit
 import java.awt.datatransfer.DataFlavor
@@ -34,7 +35,7 @@ import java.awt.datatransfer.StringSelection
 import java.text.SimpleDateFormat
 import java.util.*
 
-@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ChatbotScreen(
     viewModel: ChatbotViewModel,
@@ -45,6 +46,8 @@ fun ChatbotScreen(
 ) {
     val focusRequester = remember { FocusRequester() }
     val listState = rememberLazyListState()
+    var selectedModel by remember { mutableStateOf(model) }
+    var expandedModelDropdown by remember { mutableStateOf(false) }
     
     // Auto-scroll to bottom when new messages arrive
     LaunchedEffect(viewModel.messages.size) {
@@ -221,6 +224,81 @@ fun ChatbotScreen(
             Spacer(modifier = Modifier.height(8.dp))
         }
         
+        // Model selector
+        ExposedDropdownMenuBox(
+            expanded = expandedModelDropdown,
+            onExpandedChange = { expandedModelDropdown = it },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            OutlinedTextField(
+                value = selectedModel.substringAfterLast("/").substringBefore(":"),
+                onValueChange = {},
+                readOnly = true,
+                label = {
+                    Text(
+                        "Model",
+                        color = Color.White.copy(alpha = 0.7f),
+                        fontSize = 11.sp
+                    )
+                },
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedModelDropdown)
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedContainerColor = Color.White.copy(alpha = 0.05f),
+                    unfocusedContainerColor = Color.White.copy(alpha = 0.05f),
+                    focusedBorderColor = Color.White.copy(alpha = 0.3f),
+                    unfocusedBorderColor = Color.White.copy(alpha = 0.1f),
+                ),
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                textStyle = LocalTextStyle.current.copy(fontSize = 12.sp)
+            )
+            
+            ExposedDropdownMenu(
+                expanded = expandedModelDropdown,
+                onDismissRequest = { expandedModelDropdown = false },
+                modifier = Modifier
+                    .background(Color(0xFF2D2D2D))
+                    .heightIn(max = 300.dp)
+            ) {
+                OpenRouterService.ALL_PREDEFINED_MODELS.forEach { modelOption ->
+                    DropdownMenuItem(
+                        text = {
+                            Column {
+                                Text(
+                                    text = modelOption.substringAfterLast("/").substringBefore(":"),
+                                    color = Color.White,
+                                    fontSize = 12.sp
+                                )
+                                Text(
+                                    text = if (modelOption.contains(":free")) "Free" else "Paid",
+                                    color = if (modelOption.contains(":free")) 
+                                        Color(0xFF4CAF50) 
+                                    else 
+                                        Color(0xFFFF9800),
+                                    fontSize = 10.sp
+                                )
+                            }
+                        },
+                        onClick = {
+                            selectedModel = modelOption
+                            expandedModelDropdown = false
+                        },
+                        colors = MenuDefaults.itemColors(
+                            textColor = Color.White
+                        )
+                    )
+                }
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(12.dp))
+        
         // Chip buttons for quick replies
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -308,7 +386,7 @@ fun ChatbotScreen(
                                     viewModel.sendMessage(
                                         viewModel.currentInput.value,
                                         apiKey,
-                                        model
+                                        selectedModel
                                     )
                                 }
                                 true
@@ -339,7 +417,7 @@ fun ChatbotScreen(
                         viewModel.sendMessage(
                             viewModel.currentInput.value,
                             apiKey,
-                            model
+                            selectedModel
                         )
                     }
                 ),
@@ -355,7 +433,7 @@ fun ChatbotScreen(
                     viewModel.sendMessage(
                         viewModel.currentInput.value,
                         apiKey,
-                        model
+                        selectedModel
                     )
                 },
                 enabled = viewModel.currentInput.value.isNotBlank() && !viewModel.isLoading.value,
@@ -428,6 +506,17 @@ private fun MessageBubble(
                         textAlign = if (message.isUser) TextAlign.End else TextAlign.Start,
                         modifier = Modifier.fillMaxWidth()
                     )
+                    
+                    // Display model name if available
+                    if (message.model != null) {
+                        Text(
+                            text = message.model.substringAfterLast("/").substringBefore(":"),
+                            color = Color.White.copy(alpha = 0.5f),
+                            fontSize = 8.sp,
+                            textAlign = if (message.isUser) TextAlign.End else TextAlign.Start,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
                 
                 // Copy button for all messages
