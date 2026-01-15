@@ -4,10 +4,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -347,7 +349,7 @@ fun ChatbotScreen(
         
         // Chip buttons for quick replies
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // Reply to email chip
@@ -400,6 +402,62 @@ fun ChatbotScreen(
             ) {
                 Text(
                     text = "Reply to message",
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    color = Color.White.copy(alpha = 0.9f),
+                    fontSize = 11.sp
+                )
+            }
+
+            // Rewrite chip
+            Card(
+                modifier = Modifier
+                    .clickable {
+                        try {
+                            val clipboard = Toolkit.getDefaultToolkit().systemClipboard
+                            val clipboardContent = clipboard.getData(DataFlavor.stringFlavor) as? String
+                            if (!clipboardContent.isNullOrBlank()) {
+                                val newText = "Rewrite this text more clearly: \"${clipboardContent.trim()}\" "
+                                viewModel.updateInput(newText)
+                            }
+                        } catch (e: Exception) {
+                            // Handle clipboard access error silently
+                        }
+                    },
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White.copy(alpha = 0.1f)
+                ),
+                shape = RoundedCornerShape(20.dp)
+            ) {
+                Text(
+                    text = "Rewrite",
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    color = Color.White.copy(alpha = 0.9f),
+                    fontSize = 11.sp
+                )
+            }
+
+            // Translate chip
+            Card(
+                modifier = Modifier
+                    .clickable {
+                        try {
+                            val clipboard = Toolkit.getDefaultToolkit().systemClipboard
+                            val clipboardContent = clipboard.getData(DataFlavor.stringFlavor) as? String
+                            if (!clipboardContent.isNullOrBlank()) {
+                                val newText = "Translate this text to [language]: \"${clipboardContent.trim()}\" "
+                                viewModel.updateInput(newText)
+                            }
+                        } catch (e: Exception) {
+                            // Handle clipboard access error silently
+                        }
+                    },
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White.copy(alpha = 0.1f)
+                ),
+                shape = RoundedCornerShape(20.dp)
+            ) {
+                Text(
+                    text = "Translate",
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     color = Color.White.copy(alpha = 0.9f),
                     fontSize = 11.sp
