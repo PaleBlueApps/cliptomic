@@ -378,7 +378,7 @@ fun SettingsScreen(
                 )
                 
                 Text(
-                    text = "Use {text} as a placeholder for the clipboard content. This template will be sent to the AI with your text.",
+                    text = "Use {text} as a placeholder for the clipboard content. If your clipboard starts with [prompt], that prompt will be used instead of this template.",
                     color = Color.White.copy(alpha = 0.6f),
                     fontSize = 12.sp
                 )
@@ -433,6 +433,11 @@ fun SettingsScreen(
                         text = "4. Paste the improved text wherever you need it",
                         color = Color.White.copy(alpha = 0.7f),
                         fontSize = 13.sp
+                    )
+                    Text(
+                        text = "Tip: Start your copied text with [instruction] to override the default template. E.g., '[translate to greek] hello world'",
+                        color = Color.White.copy(alpha = 0.5f),
+                        fontSize = 12.sp
                     )
                 }
                 

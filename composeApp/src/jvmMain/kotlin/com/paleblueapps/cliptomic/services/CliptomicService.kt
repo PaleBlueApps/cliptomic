@@ -85,12 +85,33 @@ class CliptomicService(
             val systemPrompt = settingsViewModel.getCurrentSystemPrompt()
             val userPromptTemplate = settingsViewModel.getCurrentUserPromptTemplate()
             
+            // Check for custom prompt in brackets: [prompt] text
+            val trimmedOriginal = originalText.trim()
+            val (finalUserPromptTemplate, textToProcess) = if (trimmedOriginal.startsWith("[")) {
+                val closingBracketIndex = trimmedOriginal.indexOf(']')
+                if (closingBracketIndex != -1) {
+                    val customPrompt = trimmedOriginal.substring(1, closingBracketIndex).trim()
+                    val remainingText = trimmedOriginal.substring(closingBracketIndex + 1).trim()
+                    if (remainingText.isNotEmpty()) {
+                        // If custom prompt doesn't have {text} placeholder, append it
+                        val template = if (customPrompt.contains("{text}")) customPrompt else "$customPrompt: {text}"
+                        template to remainingText
+                    } else {
+                        userPromptTemplate to originalText
+                    }
+                } else {
+                    userPromptTemplate to originalText
+                }
+            } else {
+                userPromptTemplate to originalText
+            }
+            
             val rewriteResult = openRouterService.rewriteText(
-                text = originalText,
+                text = textToProcess,
                 apiKey = apiKey,
                 model = model,
                 systemPrompt = systemPrompt,
-                userPromptTemplate = userPromptTemplate
+                userPromptTemplate = finalUserPromptTemplate
             )
             
             if (rewriteResult.isFailure) {
