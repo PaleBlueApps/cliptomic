@@ -25,6 +25,7 @@ import androidx.compose.ui.input.key.*
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -362,6 +363,7 @@ fun ChatbotScreen(
                             if (!clipboardContent.isNullOrBlank()) {
                                 val newText = "Reply to this email with a complete email response: \"${clipboardContent.trim()}\" "
                                 viewModel.updateInput(newText)
+                                focusRequester.requestFocus()
                             }
                         } catch (e: Exception) {
                             // Handle clipboard access error silently
@@ -390,6 +392,7 @@ fun ChatbotScreen(
                             if (!clipboardContent.isNullOrBlank()) {
                                 val newText = "Reply to this message: \"${clipboardContent.trim()}\" "
                                 viewModel.updateInput(newText)
+                                focusRequester.requestFocus()
                             }
                         } catch (e: Exception) {
                             // Handle clipboard access error silently
@@ -418,6 +421,7 @@ fun ChatbotScreen(
                             if (!clipboardContent.isNullOrBlank()) {
                                 val newText = "Rewrite this text more clearly: \"${clipboardContent.trim()}\" "
                                 viewModel.updateInput(newText)
+                                focusRequester.requestFocus()
                             }
                         } catch (e: Exception) {
                             // Handle clipboard access error silently
@@ -444,8 +448,9 @@ fun ChatbotScreen(
                             val clipboard = Toolkit.getDefaultToolkit().systemClipboard
                             val clipboardContent = clipboard.getData(DataFlavor.stringFlavor) as? String
                             if (!clipboardContent.isNullOrBlank()) {
-                                val newText = "Translate this text to [language]: \"${clipboardContent.trim()}\" "
+                                val newText = "\"${clipboardContent.trim()}\" : Translate this text to [language]"
                                 viewModel.updateInput(newText)
+                                focusRequester.requestFocus()
                             }
                         } catch (e: Exception) {
                             // Handle clipboard access error silently
@@ -474,7 +479,7 @@ fun ChatbotScreen(
         ) {
             OutlinedTextField(
                 value = viewModel.currentInput.value,
-                onValueChange = viewModel::updateInput,
+                onValueChange = { viewModel.updateInput(it) },
                 modifier = Modifier
                     .weight(1f)
                     .focusRequester(focusRequester)
@@ -482,13 +487,13 @@ fun ChatbotScreen(
                         if (keyEvent.key == Key.Enter && keyEvent.type == KeyEventType.KeyDown) {
                             if (keyEvent.isShiftPressed) {
                                 // Shift+Enter for new line
-                                viewModel.updateInput(viewModel.currentInput.value + "\n")
+                                viewModel.updateInput(viewModel.currentInput.value.text + "\n")
                                 true
                             } else {
                                 // Enter to send
-                                if (viewModel.currentInput.value.isNotBlank()) {
+                                if (viewModel.currentInput.value.text.isNotBlank()) {
                                     viewModel.sendMessage(
-                                        viewModel.currentInput.value,
+                                        viewModel.currentInput.value.text,
                                         apiKey,
                                         selectedModel
                                     )
@@ -519,7 +524,7 @@ fun ChatbotScreen(
                 keyboardActions = KeyboardActions(
                     onSend = {
                         viewModel.sendMessage(
-                            viewModel.currentInput.value,
+                            viewModel.currentInput.value.text,
                             apiKey,
                             selectedModel
                         )
@@ -535,16 +540,16 @@ fun ChatbotScreen(
             IconButton(
                 onClick = {
                     viewModel.sendMessage(
-                        viewModel.currentInput.value,
+                        viewModel.currentInput.value.text,
                         apiKey,
                         selectedModel
                     )
                 },
-                enabled = viewModel.currentInput.value.isNotBlank() && !viewModel.isLoading.value,
+                enabled = viewModel.currentInput.value.text.isNotBlank() && !viewModel.isLoading.value,
                 modifier = Modifier
                     .size(48.dp)
                     .background(
-                        if (viewModel.currentInput.value.isNotBlank() && !viewModel.isLoading.value) 
+                        if (viewModel.currentInput.value.text.isNotBlank() && !viewModel.isLoading.value) 
                             Color.White.copy(alpha = 0.2f)
                         else 
                             Color.White.copy(alpha = 0.05f),
@@ -553,7 +558,7 @@ fun ChatbotScreen(
             ) {
                 Text(
                     "→",
-                    color = if (viewModel.currentInput.value.isNotBlank() && !viewModel.isLoading.value) 
+                    color = if (viewModel.currentInput.value.text.isNotBlank() && !viewModel.isLoading.value) 
                         Color.White 
                     else 
                         Color.White.copy(alpha = 0.5f),

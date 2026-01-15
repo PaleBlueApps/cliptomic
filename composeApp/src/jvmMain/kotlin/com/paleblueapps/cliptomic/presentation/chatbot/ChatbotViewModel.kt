@@ -2,6 +2,8 @@ package com.paleblueapps.cliptomic.presentation.chatbot
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import com.paleblueapps.cliptomic.services.OpenRouterService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +23,7 @@ class ChatbotViewModel(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     
     val messages = mutableStateListOf<ChatMessage>()
-    val currentInput = mutableStateOf("")
+    val currentInput = mutableStateOf(TextFieldValue(""))
     val isLoading = mutableStateOf(false)
     val error = mutableStateOf<String?>(null)
     
@@ -34,7 +36,7 @@ class ChatbotViewModel(
         
         // Add user message
         messages.add(ChatMessage(content = message.trim(), isUser = true, model = model))
-        currentInput.value = ""
+        currentInput.value = TextFieldValue("")
         isLoading.value = true
         error.value = null
         
@@ -73,7 +75,14 @@ class ChatbotViewModel(
         error.value = null
     }
     
-    fun updateInput(input: String) {
+    fun updateInput(input: TextFieldValue) {
         currentInput.value = input
+    }
+    
+    fun updateInput(input: String) {
+        currentInput.value = TextFieldValue(
+            text = input,
+            selection = TextRange(input.length)
+        )
     }
 }
