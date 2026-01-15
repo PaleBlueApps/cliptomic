@@ -361,7 +361,7 @@ fun ChatbotScreen(
                             val clipboard = Toolkit.getDefaultToolkit().systemClipboard
                             val clipboardContent = clipboard.getData(DataFlavor.stringFlavor) as? String
                             if (!clipboardContent.isNullOrBlank()) {
-                                val newText = "Reply to this email with a complete email response: \"${clipboardContent.trim()}\" "
+                                val newText = "Reply to this email with a complete email response (no subject line, just the email body): \"${clipboardContent.trim()}\" "
                                 viewModel.updateInput(newText)
                                 focusRequester.requestFocus()
                             }
