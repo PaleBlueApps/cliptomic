@@ -30,8 +30,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.window.*
 import com.paleblueapps.cliptomic.services.OpenRouterService
 import kotlinx.coroutines.delay
+import kotlin.math.roundToInt
+import java.awt.MouseInfo
 import java.awt.Toolkit
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.StringSelection
@@ -40,9 +43,8 @@ import java.util.*
 
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun ChatbotScreen(
+fun WindowScope.ChatbotScreen(
     viewModel: ChatbotViewModel,
-    windowState: androidx.compose.ui.window.WindowState,
     apiKey: String,
     model: String,
     onClose: () -> Unit
@@ -51,6 +53,8 @@ fun ChatbotScreen(
     val listState = rememberLazyListState()
     var selectedModel by remember { mutableStateOf(model) }
     var expandedModelDropdown by remember { mutableStateOf(false) }
+    
+    val dragData = remember { floatArrayOf(0f, 0f, 0f, 0f) }
     
     // Auto-scroll to bottom when new messages arrive
     LaunchedEffect(viewModel.messages.size) {
@@ -79,16 +83,21 @@ fun ChatbotScreen(
                 .fillMaxWidth()
                 .pointerInput(Unit) {
                     detectDragGestures(
-                        onDragStart = { },
-                        onDragEnd = { },
-                        onDragCancel = { },
-                        onDrag = { change, dragAmount ->
+                        onDragStart = {
+                            val mouseLoc = MouseInfo.getPointerInfo().location
+                            dragData[0] = mouseLoc.x.toFloat()
+                            dragData[1] = mouseLoc.y.toFloat()
+                            dragData[2] = window.x.toFloat()
+                            dragData[3] = window.y.toFloat()
+                        },
+                        onDrag = { change, _ ->
                             change.consume()
-                            val currentPosition = windowState.position
-                            windowState.position = androidx.compose.ui.window.WindowPosition(
-                                x = currentPosition.x + (dragAmount.x / density).dp,
-                                y = currentPosition.y + (dragAmount.y / density).dp
-                            )
+                            val mouseLoc = MouseInfo.getPointerInfo().location
+                            val nextX = (dragData[2] + (mouseLoc.x - dragData[0])).roundToInt()
+                            val nextY = (dragData[3] + (mouseLoc.y - dragData[1])).roundToInt()
+                            if (nextX != window.x || nextY != window.y) {
+                                window.setLocation(nextX, nextY)
+                            }
                         }
                     )
                 },

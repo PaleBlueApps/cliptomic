@@ -2,10 +2,7 @@ package com.paleblueapps.cliptomic
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.WindowState
-import androidx.compose.ui.window.application
-import androidx.compose.ui.window.WindowPlacement
+import androidx.compose.ui.window.*
 import java.awt.Color as AwtColor
 import com.paleblueapps.cliptomic.presentation.TrayManager
 import com.paleblueapps.cliptomic.presentation.settings.SettingsScreen
@@ -60,7 +57,6 @@ fun main() {
             ) {
                 SettingsScreen(
                     viewModel = settingsViewModel,
-                    windowState = settingsWindowState,
                     onClose = { trayManager.showSettings.value = false }
                 )
             }
@@ -78,7 +74,6 @@ fun main() {
             ) {
                 ChatbotScreen(
                     viewModel = chatbotViewModel,
-                    windowState = chatbotWindowState,
                     apiKey = settingsViewModel.getCurrentApiKey(),
                     model = settingsViewModel.getCurrentModel(),
                     onClose = { trayManager.showChatbot.value = false }

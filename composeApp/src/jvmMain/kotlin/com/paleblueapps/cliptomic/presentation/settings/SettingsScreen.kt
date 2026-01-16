@@ -19,18 +19,22 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.window.WindowScope
+import java.awt.MouseInfo
+import kotlin.math.roundToInt
 import com.paleblueapps.cliptomic.services.OpenRouterService
 
 @OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
-fun SettingsScreen(
+fun WindowScope.SettingsScreen(
     viewModel: SettingsViewModel = viewModel(),
-    windowState: androidx.compose.ui.window.WindowState,
     onClose: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showApiKey by remember { mutableStateOf(false) }
     var expandedDropdown by remember { mutableStateOf(false) }
+
+    val dragData = remember { floatArrayOf(0f, 0f, 0f, 0f) }
 
     Column(
         modifier = Modifier
@@ -47,16 +51,21 @@ fun SettingsScreen(
                 .fillMaxWidth()
                 .pointerInput(Unit) {
                     detectDragGestures(
-                        onDragStart = { },
-                        onDragEnd = { },
-                        onDragCancel = { },
-                        onDrag = { change, dragAmount ->
+                        onDragStart = {
+                            val mouseLoc = MouseInfo.getPointerInfo().location
+                            dragData[0] = mouseLoc.x.toFloat()
+                            dragData[1] = mouseLoc.y.toFloat()
+                            dragData[2] = window.x.toFloat()
+                            dragData[3] = window.y.toFloat()
+                        },
+                        onDrag = { change, _ ->
                             change.consume()
-                            val currentPosition = windowState.position
-                            windowState.position = androidx.compose.ui.window.WindowPosition(
-                                x = currentPosition.x + (dragAmount.x / density).dp,
-                                y = currentPosition.y + (dragAmount.y / density).dp
-                            )
+                            val mouseLoc = MouseInfo.getPointerInfo().location
+                            val nextX = (dragData[2] + (mouseLoc.x - dragData[0])).roundToInt()
+                            val nextY = (dragData[3] + (mouseLoc.y - dragData[1])).roundToInt()
+                            if (nextX != window.x || nextY != window.y) {
+                                window.setLocation(nextX, nextY)
+                            }
                         }
                     )
                 },
