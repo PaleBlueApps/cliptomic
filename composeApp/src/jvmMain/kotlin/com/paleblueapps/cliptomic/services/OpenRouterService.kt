@@ -132,32 +132,23 @@ class OpenRouterService {
     }
 
     companion object {
-        // Free models available on OpenRouter
+        // Curated free models available on OpenRouter
         val FREE_MODELS = listOf(
-            "mistralai/mistral-small-3.2-24b-instruct:free",
-            "mistralai/mistral-7b-instruct:free",
-            "openai/gpt-oss-120b:free",
-            "openai/gpt-oss-120b:free",
-            "meta-llama/llama-3.3-8b-instruct:free",
-            "meta-llama/llama-4-maverick:free",
-            "meta-llama/llama-3.3-70b-instruct:free",
-            "qwen/qwen3-30b-a3b:free",
-            "google/gemma-3-27b-it:free",
             "google/gemini-2.0-flash-exp:free",
-            "microsoft/phi-3-mini-128k-instruct:free",
-            "huggingfaceh4/zephyr-7b-beta:free",
-            "openchat/openchat-7b:free",
-            "gryphe/mythomist-7b:free",
-            "undi95/toppy-m-7b:free",
+            "google/gemma-3-27b-it:free",
+            "meta-llama/llama-4-maverick:free",
+            "mistralai/mistral-7b-instruct:free",
+            "mistralai/mistral-small-3.2-24b-instruct:free",
+            "qwen/qwen3-30b-a3b:free",
         )
 
         // Top paid models
         val PAID_MODELS = listOf(
-            "anthropic/claude-sonnet-4",
-            "google/gemini-2.5-flash",
-            "google/gemini-2.5-pro",
-            "openai/gpt-4.1-mini",
-            "openai/gpt-5",
+            "google/gemini-3-pro",
+            "google/gemini-3-flash",
+            "anthropic/claude-opus-4",
+            "mistralai/mistral-large",
+            "mistralai/mistral-small",
             "openai/gpt-4.1-mini",
             "deepseek/deepseek-chat-v3.1",
         )
