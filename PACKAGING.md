@@ -35,6 +35,71 @@ To ensure a fresh build:
 ./gradlew :composeApp:clean :composeApp:packageDmg
 ```
 
+## Code Signing for Distribution
+
+To distribute your app without macOS showing "unidentified developer" warnings, you need to sign the DMG with an Apple Developer certificate and optionally notarize it.
+
+### Prerequisites for Signing
+
+1. **Apple Developer Account**: Enroll in the [Apple Developer Program](https://developer.apple.com/programs/)
+2. **Developer ID Certificate**: Create a "Developer ID Application" certificate in your Apple Developer account and install it in your Keychain
+3. **App-Specific Password**: Generate an app-specific password at [appleid.apple.com](https://appleid.apple.com) (required for notarization)
+
+### Finding Your Signing Identity
+
+List available signing identities in your Keychain:
+
+```bash
+security find-identity -v -p codesigning
+```
+
+Look for an identity like: `Developer ID Application: Your Name (TEAM_ID)`
+
+### Building a Signed DMG
+
+To build a signed DMG, provide your signing identity:
+
+```bash
+./gradlew :composeApp:packageDmg -PmacSigningIdentity="Developer ID Application: Your Name (TEAM_ID)"
+```
+
+### Building a Signed and Notarized DMG
+
+For full distribution (recommended), also notarize the DMG with Apple:
+
+```bash
+./gradlew :composeApp:packageDmg \
+  -PmacSigningIdentity="Developer ID Application: Your Name (TEAM_ID)" \
+  -PappleId="your-apple-id@example.com" \
+  -PapplePassword="your-app-specific-password" \
+  -PappleTeamId="YOUR_TEAM_ID"
+```
+
+### Using gradle.properties (Recommended for CI/CD)
+
+Instead of passing parameters on the command line, you can set them in `~/.gradle/gradle.properties` (user-level) or in the project's `gradle.properties`:
+
+```properties
+# macOS Code Signing
+macSigningIdentity=Developer ID Application: Your Name (TEAM_ID)
+
+# Notarization (optional but recommended)
+appleId=your-apple-id@example.com
+applePassword=your-app-specific-password
+appleTeamId=YOUR_TEAM_ID
+```
+
+**Security Note**: Never commit credentials to version control. Use environment variables or a local `gradle.properties` file.
+
+### Verifying the Signature
+
+After building, verify the signature:
+
+```bash
+codesign --verify --verbose=4 composeApp/build/compose/binaries/main/app/Cliptomic.app
+spctl --assess --verbose=4 --type execute composeApp/build/compose/binaries/main/app/Cliptomic.app
+```
+
 ## Generated Files
 
 After successful packaging, you'll find:

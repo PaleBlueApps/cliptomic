@@ -55,6 +55,27 @@ compose.desktop {
                 bundleID = "com.paleblueapps.cliptomic"
                 appCategory = "public.app-category.productivity"
                 entitlementsFile.set(project.file("entitlements.plist"))
+                
+                // Code signing configuration
+                // To sign the app, provide the signing identity via gradle property:
+                // ./gradlew :composeApp:packageDmg -PmacSigningIdentity="Developer ID Application: Your Name (TEAM_ID)"
+                signing {
+                    sign.set(project.findProperty("macSigningIdentity") != null)
+                    identity.set(project.findProperty("macSigningIdentity") as? String ?: "")
+                }
+                
+                // Notarization configuration (required for distribution outside App Store)
+                // Provide these via gradle properties or environment variables:
+                // -PappleId="your-apple-id@example.com"
+                // -PapplePassword="app-specific-password"
+                // -PappleTeamId="YOUR_TEAM_ID"
+                if (project.findProperty("appleId") != null) {
+                    notarization {
+                        appleID.set(project.findProperty("appleId") as? String ?: "")
+                        password.set(project.findProperty("applePassword") as? String ?: "")
+                        teamID.set(project.findProperty("appleTeamId") as? String ?: "")
+                    }
+                }
             }
         }
     }
