@@ -156,19 +156,19 @@ class OpenRouterService {
         val FREE_MODELS = listOf(
             "google/gemini-2.0-flash-exp:free",
             "google/gemma-3-27b-it:free",
-            "meta-llama/llama-4-maverick:free",
-            "mistralai/mistral-7b-instruct:free",
-            "mistralai/mistral-small-3.2-24b-instruct:free",
-            "qwen/qwen3-30b-a3b:free",
+            "meta-llama/llama-3.3-70b-instruct:free",
+            "mistralai/mistral-small-3.1-24b-instruct:free",
+            "mistralai/devstral-2512:free",
+            "qwen/qwen3-4b:free",
         )
 
         // Top paid models
         val PAID_MODELS = listOf(
-            "google/gemini-3-pro",
-            "google/gemini-3-flash",
+            "google/gemini-3-pro-preview",
+            "google/gemini-3-flash-preview",
             "anthropic/claude-opus-4",
             "mistralai/mistral-large",
-            "mistralai/mistral-small",
+            "mistralai/mistral-small-3.2-24b-instruct",
             "openai/gpt-4.1-mini",
             "deepseek/deepseek-chat-v3.1",
         )
