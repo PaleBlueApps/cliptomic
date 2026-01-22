@@ -29,7 +29,15 @@ data class Message(
 
 @Serializable
 data class OpenRouterResponse(
-    val choices: List<Choice>
+    val choices: List<Choice>? = null,
+    val error: OpenRouterError? = null
+)
+
+@Serializable
+data class OpenRouterError(
+    val message: String? = null,
+    val type: String? = null,
+    val code: String? = null
 )
 
 @Serializable
@@ -77,7 +85,13 @@ class OpenRouterService {
                 setBody(request)
             }.body()
 
-            val rewrittenText = response.choices.firstOrNull()?.message?.content
+            // Check for API error response
+            if (response.error != null) {
+                val errorMessage = response.error.message ?: "Unknown API error"
+                return@withContext Result.failure(Exception("OpenRouter API error: $errorMessage"))
+            }
+
+            val rewrittenText = response.choices?.firstOrNull()?.message?.content
                 ?: return@withContext Result.failure(Exception("No response from OpenRouter"))
 
             Result.success(rewrittenText.trim())
@@ -118,7 +132,13 @@ class OpenRouterService {
                 setBody(request)
             }.body()
 
-            val responseText = response.choices.firstOrNull()?.message?.content
+            // Check for API error response
+            if (response.error != null) {
+                val errorMessage = response.error.message ?: "Unknown API error"
+                return@withContext Result.failure(Exception("OpenRouter API error: $errorMessage"))
+            }
+
+            val responseText = response.choices?.firstOrNull()?.message?.content
                 ?: return@withContext Result.failure(Exception("No response from OpenRouter"))
 
             Result.success(responseText.trim())
