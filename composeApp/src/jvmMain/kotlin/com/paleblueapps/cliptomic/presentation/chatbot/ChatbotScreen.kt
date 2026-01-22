@@ -233,12 +233,14 @@ fun WindowScope.ChatbotScreen(
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    text = viewModel.error.value!!,
-                    color = Color(0xFFFF9999),
-                    fontSize = 11.sp,
-                    modifier = Modifier.padding(12.dp)
-                )
+                SelectionContainer {
+                    Text(
+                        text = viewModel.error.value!!,
+                        color = Color(0xFFFF9999),
+                        fontSize = 11.sp,
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(8.dp))
         }
