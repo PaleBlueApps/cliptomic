@@ -2,6 +2,8 @@
 
 Cliptomic is an open-source macOS tool designed to keep you in the flow. It started as a distraction-free AI rewriter triggered by hotkeys, and now it's even more powerful. Use it invisibly for instant edits, or call up the optional UI to switch between multiple LLMs, run advanced queries, and execute quick actions like email replies or translations—all without leaving your current app.
 
+[Watch the demo video](https://www.youtube.com/watch?v=PfSCECRCZCQ)
+
 ## Keyboard Shortcuts
 
 | Shortcut | Action |
